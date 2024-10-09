@@ -6,12 +6,13 @@ import type { ReactElement, ReactNode } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import '../css/main.css'
-import global from '@/constants/global';
+import global from '@/constants/global'
 import useConfigPage from '@/store/custom_hooks/useConfigPage'
-import { checkDarkLightMode } from '@/ultis/globalUltils'
-import { getCookie } from '@/ultis/cookieHandler'
+import { checkDarkLightMode } from '@/utils/globalUltils'
+import { getCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
 import { useRouter } from 'next/router'
+import { useGetInfoDetail } from '@/store/api_hooks'
 
 export type NextPageWithLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
@@ -26,12 +27,43 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const title = global.titleApp
   const description = global.descriptionApp
 
+  const { data, loading, success, error, fetchInfo } = useGetInfoDetail()
+  const accessToken = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
+  const email = getCookie(COOKIE_KEYS.USER_GMAIL)
+  const { userInfo, setUserInfo } = useConfigPage()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (
+      accessToken !== undefined &&
+      accessToken !== 'undefined' &&
+      accessToken !== null &&
+      accessToken !== 'null'
+    ) {
+      // console.log('Refresh user info')
+      fetchInfo(email)
+    } else {
+      router.push('/login')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (success !== null && success === true) {
+      // console.log('Set refresh user info')
+      // console.log(JSON.stringify(data))
+      // console.log(JSON.stringify(userInfo))
+      setUserInfo(data)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, success])
+
   return (
     <>
       {getLayout(
         <>
           <Head>
-            <meta name='title' content={title}/>
+            <meta name="title" content={title} />
             <meta name="description" content={description} />
 
             {/* <meta property="og:url" content={url} />
@@ -53,6 +85,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             <link rel="icon" href="/project_manager/favicon.png" />
           </Head>
 
+          {/* SEO Google Function */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=UA-130795909-1"
             strategy="afterInteractive"
@@ -66,6 +99,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
               gtag('config', 'UA-130795909-1');
             `}
           </Script>
+          {/* SEO Google Function */}
 
           <Component {...pageProps} />
         </>

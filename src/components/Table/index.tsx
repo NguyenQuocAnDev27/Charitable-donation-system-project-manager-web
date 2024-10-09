@@ -8,36 +8,43 @@ import Buttons from '../Buttons'
 import CardBoxModal from '../CardBox/Modal'
 import UserAvatar from '../UserAvatar'
 import { OverviewProject } from '@/interfaces/OverviewProject'
-import { formatCurrencyToVND } from '@/ultis/globalUltils'
+import { formatCurrencyToVND } from '@/utils/globalUltils'
 
-function calculateRemainingDays(expired_day: Date): number {
-    const currentDate = new Date();
-    const timeDifference = expired_day.getTime() - currentDate.getTime();
-    const remainingDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
-    return remainingDays;
+function calculateRemainingDays(expired_day: Date | string, start_day: Date | string): number {
+  const expirationDate = typeof expired_day === 'string' ? new Date(expired_day) : expired_day
+  const startDate = typeof start_day === 'string' ? new Date(start_day) : start_day
+
+  // Check if the dates are valid
+  if (isNaN(expirationDate.getTime()) || isNaN(startDate.getTime())) {
+    console.error('Invalid date(s) provided.')
+    return NaN // or handle the error as needed
+  }
+
+  console.log(`End - ${expirationDate} # Start - ${startDate}`)
+  console.log(`Day 1 - ${expirationDate.getTime()} # Day 2 - ${startDate.getTime()}`)
+
+  const timeDifference = expirationDate.getTime() - startDate.getTime()
+  const remainingDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
+
+  return remainingDays
 }
 
 const TableLabels = {
-    Name: "Chiến dịch",
-    CurrentAmount: "Số tiền ủng hộ hiện tại",
-    Process: "Tiến độ",
-    RemainingDays: "Số ngày còn lại",
+  Name: 'Chiến dịch',
+  CurrentAmount: 'Số tiền ủng hộ hiện tại',
+  Process: 'Tiến độ',
+  RemainingDays: 'Số ngày còn lại',
 }
 
-const ProjectTables : React.FC<{ data: OverviewProject[] }> = ({ data })=> {
-  const { clients } = useSampleClients()
-
-  const perPage = 5
-
-  const [currentPage, setCurrentPage] = useState(0)
-
-  const clientsPaginated = clients.slice(perPage * currentPage, perPage * (currentPage + 1))
-
-  const numPages = clients.length / perPage
-
+const ProjectTables: React.FC<{
+  data: OverviewProject[]
+  currentPage: number
+  totalPage: number
+  handleOnClickPage: (page: number) => void
+}> = ({ data, currentPage, totalPage, handleOnClickPage }) => {
   const pagesList = []
 
-  for (let i = 0; i < numPages; i++) {
+  for (let i = 0; i < totalPage; i++) {
     pagesList.push(i)
   }
 
@@ -91,22 +98,27 @@ const ProjectTables : React.FC<{ data: OverviewProject[] }> = ({ data })=> {
         </thead>
         <tbody>
           {data.map((project: OverviewProject) => (
-            <tr key={project.project_id}>
-              <td data-label={TableLabels.Name}>{project.project_name}</td>
+            <tr key={project.projectId}>
+              <td data-label={TableLabels.Name}>{project.projectName}</td>
               <td data-label={TableLabels.CurrentAmount} className="lg:w-60 text-right">
-                    {formatCurrencyToVND(project.current_amount)}
-                </td>
+                {formatCurrencyToVND(project.currentAmount)}
+              </td>
               <td data-label={TableLabels.Process} className="lg:w-32">
                 <progress
                   className="flex w-2/5 self-center lg:w-full"
                   max="100"
-                  value={project.current_amount / project.goal_amount * 100}
+                  value={(project.currentAmount / project.goalAmount) * 100}
                 >
-                  {project.current_amount / project.goal_amount * 100}
+                  {(project.currentAmount / project.goalAmount) * 100}
                 </progress>
               </td>
-              <td data-label={TableLabels.RemainingDays} className="lg:w-40 whitespace-nowrap text-center">
-                <small className="text-gray-500 dark:text-slate-400">{calculateRemainingDays(project.expired_day)}</small>
+              <td
+                data-label={TableLabels.RemainingDays}
+                className="lg:w-40 whitespace-nowrap text-center"
+              >
+                <small className="text-gray-500 dark:text-slate-400">
+                  {calculateRemainingDays(project.endDate, project.startDate)}
+                </small>
               </td>
               <td className="before:hidden lg:w-1 whitespace-nowrap">
                 <Buttons type="justify-start lg:justify-end" noWrap>
@@ -138,12 +150,12 @@ const ProjectTables : React.FC<{ data: OverviewProject[] }> = ({ data })=> {
                 label={page + 1}
                 color={page === currentPage ? 'lightDark' : 'whiteDark'}
                 small
-                onClick={() => setCurrentPage(page)}
+                onClick={() => handleOnClickPage(page)}
               />
             ))}
           </Buttons>
           <small className="mt-6 md:mt-0">
-            Page {currentPage + 1} of {numPages}
+            Page {currentPage + 1} of {totalPage}
           </small>
         </div>
       </div>

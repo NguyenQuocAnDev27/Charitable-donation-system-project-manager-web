@@ -25,7 +25,7 @@ import ChartLineSample from '@/components/ChartLineSample'
 import NotificationBar from '@/components/NotificationBar'
 import TableSampleClients from '@/components/Table/SampleClients'
 import { getPageTitle } from '@/config'
-import { checkDarkLightMode } from '@/ultis/globalUltils'
+import { checkDarkLightMode } from '@/utils/globalUltils'
 
 const DashboardPage = () => {
   const clients = []
@@ -34,7 +34,7 @@ const DashboardPage = () => {
 
   const [chartData, setChartData] = useState(sampleChartData())
 
-  checkDarkLightMode();
+  checkDarkLightMode()
 
   const fillChartData = (e: React.MouseEvent) => {
     e.preventDefault()

@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react'
 import UserAvatar from '.'
-import { getCookie } from '@/ultis/cookieHandler'
-import COOKIE_KEYS from '@/constants/cookieKeys'
+import useConfigPage from '@/store/custom_hooks/useConfigPage'
 
 type Props = {
   className?: string
@@ -9,10 +8,10 @@ type Props = {
 }
 
 export default function UserAvatarCurrentUser({ className = '', children }: Props) {
-  const userEmail = getCookie(COOKIE_KEYS.USER_NAME) ?? "Unknown User";
+  const {userInfo} = useConfigPage();
 
   return (
-    <UserAvatar username={userEmail} className={className}>
+    <UserAvatar username={userInfo?.fullName ?? 'Unknown'} className={className}>
       {children}
     </UserAvatar>
   )

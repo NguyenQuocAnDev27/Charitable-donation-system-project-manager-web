@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { ReactNode, useEffect } from 'react'
 import { useState } from 'react'
 import { mdiForwardburger, mdiBackburger, mdiMenu } from '@mdi/js'
@@ -62,7 +63,7 @@ export default function LayoutAuthenticated({ children }: Props) {
           >
             <Icon path={mdiMenu} size="24" />
           </NavBarItemPlain>
-          <NavBarItemPlain useMargin>
+          {/* <NavBarItemPlain useMargin>
             <Formik
               initialValues={{
                 search: '',
@@ -75,7 +76,7 @@ export default function LayoutAuthenticated({ children }: Props) {
                 </FormField>
               </Form>
             </Formik>
-          </NavBarItemPlain>
+          </NavBarItemPlain> */}
         </NavBar>
         <AsideMenu
           isAsideMobileExpanded={isAsideMobileExpanded}

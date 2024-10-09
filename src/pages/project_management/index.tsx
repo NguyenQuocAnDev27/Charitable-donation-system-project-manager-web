@@ -1,25 +1,48 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-'use-client';
+/* eslint-disable react-hooks/exhaustive-deps */
+'use-client'
 
-import { mdiGithub, mdiMonitorCellphone, mdiTableBorder, mdiTableOff } from '@mdi/js'
 import Head from 'next/head'
-import React, { ReactElement } from 'react'
-import Button from '@/components/Button'
+import React, { ReactElement, useEffect, useState } from 'react'
 import CardBox from '@/components/CardBox'
-import CardBoxComponentEmpty from '@/components/CardBox/Component/Empty'
 import LayoutAuthenticated from '@/layouts/Authenticated'
-import NotificationBar from '@/components/NotificationBar'
 import SectionMain from '@/components/Section/Main'
-import SectionTitleLineWithButton from '@/components/Section/TitleLineWithButton'
 import ProjectTables from '@/components/Table'
 import { getPageTitle } from '@/config'
-import data from './SampleData'
-import { getCookie, setCookie } from '@/ultis/cookieHandler'
-import COOKIE_KEYS from '@/constants/cookieKeys'
-import { checkDarkLightMode } from '@/ultis/globalUltils';
+import { checkDarkLightMode } from '@/utils/globalUltils'
+import useProjectAPI from '@/store/api_hooks/useProjects'
+import useConfigPage from '@/store/custom_hooks/useConfigPage'
 
-const TablesPage = () => {
-  checkDarkLightMode();
+const ProjectManagementPage = () => {
+  checkDarkLightMode()
+
+  const [tableData, setTableData] = useState([])
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPage, setTotalPage] = useState(1)
+  const { data, loading, error, success, fetchProjects } = useProjectAPI()
+  const { userInfo } = useConfigPage()
+
+  function handleOnClickPage(page: number) {
+    setCurrentPage(page)
+  }
+
+  useEffect(() => {
+    // console.log(`PM page ${JSON.stringify(userInfo)}`)
+    if (userInfo !== null && userInfo?.userId !== null) {
+      fetchProjects(currentPage, userInfo?.userId)
+    }
+  }, [userInfo])
+
+  useEffect(() => {
+    if (success !== null) {
+      if (success) {
+        setTableData(data.list ?? [])
+        setTotalPage(data.totalPages ?? 1)
+        setCurrentPage(data.currentPage ?? 0)
+      } else {
+        window.alert(error)
+      }
+    }
+  }, [loading, success, error])
 
   return (
     <>
@@ -44,7 +67,12 @@ const TablesPage = () => {
         </NotificationBar> */}
 
         <CardBox className="mb-6" hasTable>
-          <ProjectTables data={data} />
+          <ProjectTables
+            data={tableData}
+            currentPage={currentPage}
+            totalPage={totalPage}
+            handleOnClickPage={handleOnClickPage}
+          />
         </CardBox>
 
         {/* <SectionTitleLineWithButton icon={mdiTableOff} title="Empty variation" /> */}
@@ -61,8 +89,8 @@ const TablesPage = () => {
   )
 }
 
-TablesPage.getLayout = function getLayout(page: ReactElement) {
+ProjectManagementPage.getLayout = function getLayout(page: ReactElement) {
   return <LayoutAuthenticated>{page}</LayoutAuthenticated>
 }
 
-export default TablesPage
+export default ProjectManagementPage

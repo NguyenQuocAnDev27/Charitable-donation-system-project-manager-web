@@ -8,7 +8,7 @@ import Icon from '../../Icon'
 import UserAvatarCurrentUser from '../../UserAvatar/CurrentUser'
 import NavBarMenuList from '../MenuList'
 import { MenuNavBarItem } from '../../../interfaces'
-import { getCookie, setCookie } from '@/ultis/cookieHandler'
+import { getCookie, setCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
 import useConfigPage from '@/store/custom_hooks/useConfigPage'
 
@@ -17,9 +17,9 @@ type Props = {
 }
 
 export default function NavBarItem({ item }: Props) {
-  const { username, darkMode, setUsername, toggleDarkMode } = useConfigPage();
+  const {userInfo, toggleDarkMode } = useConfigPage();
 
-  const userName = getCookie(COOKIE_KEYS.USER_NAME) ?? 'Unknown User'
+  const userName = userInfo?.fullName ?? 'Unknown User'
 
   const [isDropdownActive, setIsDropdownActive] = useState(false)
 
@@ -42,7 +42,7 @@ export default function NavBarItem({ item }: Props) {
     if (item.isToggleLightDark) {
       const isDark = getCookie(COOKIE_KEYS.DARK_MODE)
       setCookie(COOKIE_KEYS.DARK_MODE, (isDark === 'true') ? 'false' : 'true');
-
+      toggleDarkMode();
     }
   }
 

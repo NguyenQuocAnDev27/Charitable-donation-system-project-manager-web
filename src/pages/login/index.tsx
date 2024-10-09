@@ -14,11 +14,12 @@ import Buttons from '@/components/Buttons'
 import { useRouter } from 'next/router'
 import { getPageTitle } from '@/config'
 import global from '@/constants/global'
-import { checkDarkLightMode } from '@/ultis/globalUltils'
+import { checkDarkLightMode } from '@/utils/globalUltils'
 import useAuthenticate from '@/store/api_hooks/useAuthenticate'
-import { setCookie } from '@/ultis/cookieHandler'
+import { getCookie, setCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
 import { useGetInfoDetail } from '@/store/api_hooks'
+import useConfigPage from '@/store/custom_hooks/useConfigPage'
 
 type LoginForm = {
   email: string
@@ -27,41 +28,66 @@ type LoginForm = {
 }
 
 const LoginPage = () => {
-  const router = useRouter();
-  const [ email, setEmail ] = useState(null);
-  const { 
-    data: dataAuth, loading: loadingAuthAPI, 
-    error: errorFetchAuthMessage, success: successFetchAuth, 
-    login 
-  } = useAuthenticate();
-  const { 
-    data: dataUserInfo, loading: loadingUserDetailAPI, 
-    error: errorFetchUserInfoMessage, success: successFetchUserInfo, 
-    fetchInfo 
-  } = useGetInfoDetail();
+  const router = useRouter()
+  const [email, setEmail] = useState(null)
+  const {
+    data: dataAuth,
+    loading: loadingAuthAPI,
+    error: errorFetchAuthMessage,
+    success: successFetchAuth,
+    login,
+  } = useAuthenticate()
+  const {
+    data: dataUserInfo,
+    loading: loadingUserDetailAPI,
+    error: errorFetchUserInfoMessage,
+    success: successFetchUserInfo,
+    fetchInfo,
+  } = useGetInfoDetail()
+  const { userInfo, setUserInfo } = useConfigPage()
 
-  checkDarkLightMode();
+  checkDarkLightMode()
 
   const handleSubmit = (formValues: LoginForm) => {
-    // router.push('/dashboard')
-    const form_email = formValues.email;
-    const form_password = formValues.password;
-    const form_remember = formValues.remember;
-    setEmail(form_email);
-    login(form_email, form_password);
+    const form_email = formValues.email
+    const form_password = formValues.password
+    const form_remember = formValues.remember
+    setEmail(form_email)
+    login(form_email, form_password)
   }
 
   useEffect(() => {
-    if(successFetchAuth) {
-      setCookie(COOKIE_KEYS.ACCESS_TOKEN, dataAuth.accessToken);
-      setCookie(COOKIE_KEYS.REFRESH_TOKEN, dataAuth.refreshToken);
-      fetchInfo(email)
-      router.push('/dashboard')
-    } else if (errorFetchAuthMessage !== null) {
-      window.alert(errorFetchAuthMessage);
+    if (successFetchAuth !== null) {
+      if (successFetchAuth) {
+        console.log(`Access token: ${JSON.stringify(dataAuth)}`)
+        setCookie(COOKIE_KEYS.ACCESS_TOKEN, dataAuth.accessToken)
+        setCookie(COOKIE_KEYS.REFRESH_TOKEN, dataAuth.refreshToken)
+        setCookie(COOKIE_KEYS.USER_GMAIL, email)
+
+        const accessToken = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
+        if (accessToken !== undefined && accessToken !== 'undefined') {
+          fetchInfo(email)
+        } else {
+          window.alert('Login failed')
+        }
+      } else if (errorFetchAuthMessage !== null) {
+        window.alert(errorFetchAuthMessage)
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingAuthAPI]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingAuthAPI, successFetchAuth])
+
+  useEffect(() => {
+    if (successFetchUserInfo !== null) {
+      if (successFetchUserInfo) {
+        setUserInfo(dataUserInfo)
+        router.push('/dashboard')
+      } else if (errorFetchUserInfoMessage !== null) {
+        window.alert(errorFetchUserInfoMessage)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingUserDetailAPI, successFetchUserInfo])
 
   const initialValues: LoginForm = {
     email: '',
@@ -80,11 +106,11 @@ const LoginPage = () => {
           <Formik initialValues={initialValues} onSubmit={handleSubmit}>
             <Form>
               <FormField label="Email" help="Nhập email">
-                <Field name="email" placeholder="admin_email@example.com"/>
+                <Field name="email" placeholder="admin_email@example.com" />
               </FormField>
 
               <FormField label="Mật khẩu" help="Nhập mật khẩu">
-                <Field name="password" type="password" placeholder={"*".repeat(10)} />
+                <Field name="password" type="password" placeholder={'*'.repeat(10)} />
               </FormField>
 
               <FormCheckRadio type="checkbox" label="Ghi nhớ cho lần đăng nhập sau">
@@ -93,8 +119,8 @@ const LoginPage = () => {
 
               <Divider />
 
-              <Buttons className='flex items-center w-full'>
-                <Button type="submit" label="Đăng nhập" color="info" className="w-full"/>
+              <Buttons className="flex items-center w-full">
+                <Button type="submit" label="Đăng nhập" color="info" className="w-full" />
                 {/* <Button href="/dashboard" label="Home" color="info" outline /> */}
               </Buttons>
             </Form>

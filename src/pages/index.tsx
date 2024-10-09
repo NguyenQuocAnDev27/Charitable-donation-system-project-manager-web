@@ -2,8 +2,8 @@
 import Loading from "@/components/Loading";
 import COOKIE_KEYS from "@/constants/cookieKeys";
 import useConfigPage from "@/store/custom_hooks/useConfigPage";
-import { getCookie } from "@/ultis/cookieHandler";
-import { checkDarkLightMode } from "@/ultis/globalUltils";
+import { getCookie } from "@/utils/cookieHandler";
+import { checkDarkLightMode } from "@/utils/globalUltils";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
@@ -27,7 +27,6 @@ const HomePage = () => {
         setUsername(userName);
         router.push('/dashboard');
     }
-
 
   }, [router, setUsername, toggleDarkMode]);
 

@@ -5,7 +5,7 @@ import Icon from '../Icon'
 import AsideMenuList from './List'
 import { MenuAsideItem } from '../../interfaces'
 import global from '@/constants/global';
-import { getCookie } from '@/ultis/cookieHandler'
+import { getCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
 
 type Props = {

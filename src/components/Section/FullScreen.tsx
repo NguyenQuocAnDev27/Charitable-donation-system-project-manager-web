@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react'
 import { BgKey } from '../../interfaces'
 import { gradientBgPurplePink, gradientBgDark, gradientBgPinkRed } from '../../colors'
 import COOKIE_KEYS from '@/constants/cookieKeys'
-import { getCookie } from '@/ultis/cookieHandler'
+import { getCookie } from '@/utils/cookieHandler'
 import useConfigPage from '@/store/custom_hooks/useConfigPage'
 
 type Props = {

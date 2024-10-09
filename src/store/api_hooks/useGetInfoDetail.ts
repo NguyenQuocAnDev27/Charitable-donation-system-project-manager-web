@@ -1,19 +1,19 @@
-import axios from 'axios';
-import { useCallback } from 'react';
-import { create } from 'zustand';
-import { User } from '@/interfaces';
-import { getCookie } from '@/ultis/cookieHandler';
-import COOKIE_KEYS from '@/constants/cookieKeys';
+import axios from 'axios'
+import { useCallback } from 'react'
+import { create } from 'zustand'
+import { User } from '@/interfaces'
+import { getCookie } from '@/utils/cookieHandler'
+import COOKIE_KEYS from '@/constants/cookieKeys'
 
 interface InfoState {
-  data: User;
-  loading: boolean;
-  error: string | null;
-  success: boolean | null;
-  getInfoDetail: (email: string) => Promise<void>;
+  data: User
+  loading: boolean
+  error: string | null
+  success: boolean | null
+  getInfoDetail: (email: string) => Promise<void>
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_SERVER_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_SERVER_API_URL
 
 const useInfoStore = create<InfoState>((set) => ({
   data: null,
@@ -22,14 +22,14 @@ const useInfoStore = create<InfoState>((set) => ({
   success: null,
   getInfoDetail: async (email: string) => {
     console.log(`Get InfoDetail from email ${email}`)
-    set({ loading: true, error: null, success: null });
+    set({ loading: true, error: null, success: null })
 
     // Get the token from cookies
-    const token = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
+    const token = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
 
     if (!token) {
-      set({ error: 'No token found', loading: false, success: false });
-      return;
+      set({ error: 'No token found', loading: false, success: false })
+      return
     }
 
     try {
@@ -38,23 +38,26 @@ const useInfoStore = create<InfoState>((set) => ({
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      })
 
-      const response = JSONresponse.data;
+      const response = JSONresponse.data
       // console.log(`Data fetch: ${JSON.stringify(response.data)}`);
-      set({ data: response.data, loading: false, success: true });
+      set({ data: response.data, loading: false, success: true })
     } catch (err) {
-      set({ error: err.response?.data?.message || err.message, loading: false, success: false });
+      set({ error: err.response?.data?.message || err.message, loading: false, success: false })
     }
   },
-}));
+}))
 
 export const useGetInfoDetail = () => {
-  const { data, loading, error, success, getInfoDetail } = useInfoStore();
+  const { data, loading, error, success, getInfoDetail } = useInfoStore()
 
-  const fetchInfo = useCallback((email: string) => {
-    getInfoDetail(email);
-  }, [getInfoDetail]);
+  const fetchInfo = useCallback(
+    (email: string) => {
+      getInfoDetail(email)
+    },
+    [getInfoDetail]
+  )
 
-  return { data, loading, error, success, fetchInfo };
-};
+  return { data, loading, error, success, fetchInfo }
+}
