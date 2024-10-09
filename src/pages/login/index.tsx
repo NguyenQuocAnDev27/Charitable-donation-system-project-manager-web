@@ -18,8 +18,8 @@ import { checkDarkLightMode } from '@/utils/globalUltils'
 import useAuthenticate from '@/store/api_hooks/useAuthenticate'
 import { getCookie, setCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
-import { useGetInfoDetail } from '@/store/api_hooks'
 import useConfigPage from '@/store/custom_hooks/useConfigPage'
+import useGetInfoDetail from '@/store/api_hooks/useGetInfoDetail'
 
 type LoginForm = {
   email: string
@@ -42,7 +42,7 @@ const LoginPage = () => {
     loading: loadingUserDetailAPI,
     error: errorFetchUserInfoMessage,
     success: successFetchUserInfo,
-    fetchInfo,
+    fetchInfoDetail,
   } = useGetInfoDetail()
   const { userInfo, setUserInfo } = useConfigPage()
 
@@ -66,7 +66,7 @@ const LoginPage = () => {
 
         const accessToken = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
         if (accessToken !== undefined && accessToken !== 'undefined') {
-          fetchInfo(email)
+          fetchInfoDetail(email)
         } else {
           window.alert('Login failed')
         }

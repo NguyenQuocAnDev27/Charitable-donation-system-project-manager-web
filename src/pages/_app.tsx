@@ -12,7 +12,7 @@ import { checkDarkLightMode } from '@/utils/globalUltils'
 import { getCookie } from '@/utils/cookieHandler'
 import COOKIE_KEYS from '@/constants/cookieKeys'
 import { useRouter } from 'next/router'
-import { useGetInfoDetail } from '@/store/api_hooks'
+import useGetInfoDetail from '@/store/api_hooks/useGetInfoDetail'
 
 export type NextPageWithLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
@@ -27,7 +27,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const title = global.titleApp
   const description = global.descriptionApp
 
-  const { data, loading, success, error, fetchInfo } = useGetInfoDetail()
+  const { data, loading, error, success, fetchInfoDetail } = useGetInfoDetail()
   const accessToken = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
   const email = getCookie(COOKIE_KEYS.USER_GMAIL)
   const { userInfo, setUserInfo } = useConfigPage()
@@ -41,7 +41,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       accessToken !== 'null'
     ) {
       // console.log('Refresh user info')
-      fetchInfo(email)
+      fetchInfoDetail(email)
     } else {
       router.push('/login')
     }

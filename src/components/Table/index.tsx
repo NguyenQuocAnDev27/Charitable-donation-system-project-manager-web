@@ -9,6 +9,7 @@ import CardBoxModal from '../CardBox/Modal'
 import UserAvatar from '../UserAvatar'
 import { OverviewProject } from '@/interfaces/OverviewProject'
 import { formatCurrencyToVND } from '@/utils/globalUltils'
+import global from '@/constants/global'
 
 function calculateRemainingDays(expired_day: Date | string, start_day: Date | string): number {
   const expirationDate = typeof expired_day === 'string' ? new Date(expired_day) : expired_day
@@ -99,7 +100,21 @@ const ProjectTables: React.FC<{
         <tbody>
           {data.map((project: OverviewProject) => (
             <tr key={project.projectId}>
-              <td data-label={TableLabels.Name}>{project.projectName}</td>
+              <td
+                data-label={TableLabels.Name}
+                className={`${
+                  project.status === global.PROJECT_STATUS.STOPPED
+                    ? 'text-red-500 line-through'
+                    : project.status === global.PROJECT_STATUS.COMPLETED
+                      ? 'text-purple-500'
+                      : project.status === global.PROJECT_STATUS.PENDING
+                        ? 'text-green-500'
+                        : ''
+                }`}
+              >
+                {project.projectName}
+              </td>
+
               <td data-label={TableLabels.CurrentAmount} className="lg:w-60 text-right">
                 {formatCurrencyToVND(project.currentAmount)}
               </td>

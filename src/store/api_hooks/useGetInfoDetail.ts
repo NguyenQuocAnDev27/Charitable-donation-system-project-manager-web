@@ -1,63 +1,84 @@
-import axios from 'axios'
-import { useCallback } from 'react'
-import { create } from 'zustand'
-import { User } from '@/interfaces'
-import { getCookie } from '@/utils/cookieHandler'
-import COOKIE_KEYS from '@/constants/cookieKeys'
+import axios from 'axios';
+import { useCallback } from 'react';
+import createAPIState from './createAPIState';
+import { User, APIState } from '@/interfaces';
+import { getCookie } from '@/utils/cookieHandler';
+import COOKIE_KEYS from '@/constants/cookieKeys';
+import { useTokenStore } from './useRefreshToken';
 
-interface InfoState {
-  data: User
-  loading: boolean
-  error: string | null
-  success: boolean | null
-  getInfoDetail: (email: string) => Promise<void>
-}
+const BASE_URL = process.env.NEXT_PUBLIC_SERVER_API_URL;
 
-const BASE_URL = process.env.NEXT_PUBLIC_SERVER_API_URL
+// Create a Zustand store for the Info API
+const useInfoAPIState = createAPIState<User>();
 
-const useInfoStore = create<InfoState>((set) => ({
-  data: null,
-  loading: false,
-  error: null,
-  success: null,
-  getInfoDetail: async (email: string) => {
-    console.log(`Get InfoDetail from email ${email}`)
-    set({ loading: true, error: null, success: null })
+const useGetInfoDetail = () => {
+  const { data, loading, error, success, setData, setLoading, setError, setSuccess } = useInfoAPIState();
+  const { refreshAccessToken } = useTokenStore();
 
-    // Get the token from cookies
-    const token = getCookie(COOKIE_KEYS.ACCESS_TOKEN)
+  const fetchInfoDetail = useCallback(
+    async (email: string) => {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
 
-    if (!token) {
-      set({ error: 'No token found', loading: false, success: false })
-      return
-    }
+      let token = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
 
-    try {
-      const JSONresponse = await axios.get(`${BASE_URL}/api/getInfoDetail`, {
-        params: { email },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const fetchData = async () => {
+        try {
+          const JSONresponse = await axios.get<APIState<User>>(
+            `${BASE_URL}/api/getInfoDetail`,
+            {
+              params: { email },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-      const response = JSONresponse.data
-      // console.log(`Data fetch: ${JSON.stringify(response.data)}`);
-      set({ data: response.data, loading: false, success: true })
-    } catch (err) {
-      set({ error: err.response?.data?.message || err.message, loading: false, success: false })
-    }
-  },
-}))
+          const response = JSONresponse.data.data;
 
-export const useGetInfoDetail = () => {
-  const { data, loading, error, success, getInfoDetail } = useInfoStore()
+          setData(response);
+          setSuccess(true);
+        } catch (error) {
+          let errorMessage = 'An unexpected error occurred.';
 
-  const fetchInfo = useCallback(
-    (email: string) => {
-      getInfoDetail(email)
+          if (axios.isAxiosError(error) && error.response) {
+            const status = error.response.status;
+            console.log(`Status: ${status}`);
+
+            if (status === 600) {
+              errorMessage = 'Expired Access Token. Refreshing...';
+              await refreshAccessToken();
+              token = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
+
+              if (token) {
+                await fetchData(); // Retry with new token
+                return;
+              } else {
+                errorMessage = 'Failed to refresh token.';
+              }
+            } else if (status === 601) {
+              errorMessage = 'Custom message for status 601';
+            } else if (status === 602) {
+              errorMessage = 'Custom message for status 602';
+            } else {
+              errorMessage = error.response.data?.message || errorMessage;
+            }
+          }
+
+          setError(errorMessage);
+          setSuccess(false);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      await fetchData();
     },
-    [getInfoDetail]
-  )
+    [refreshAccessToken, setData, setLoading, setError, setSuccess]
+  );
 
-  return { data, loading, error, success, fetchInfo }
-}
+  return { data, loading, error, success, fetchInfoDetail };
+};
+
+export default useGetInfoDetail;

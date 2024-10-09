@@ -45,6 +45,7 @@ const useProjectAPI = () => {
 
           if (axios.isAxiosError(error) && error.response) {
             const status = error.response.status
+            console.log(`Status: ${status}`)
 
             if (status === 600) {
               errorMessage = 'Expired Access Token. Refreshing...'
