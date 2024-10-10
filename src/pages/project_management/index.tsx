@@ -47,7 +47,7 @@ const ProjectManagementPage = () => {
   return (
     <>
       <Head>
-        <title>{getPageTitle('Tables')}</title>
+        <title>{getPageTitle('Quản Lí Chiến Dịch')}</title>
       </Head>
       <SectionMain>
         {/* <SectionTitleLineWithButton icon={mdiTableBorder} title="Tables" main>
