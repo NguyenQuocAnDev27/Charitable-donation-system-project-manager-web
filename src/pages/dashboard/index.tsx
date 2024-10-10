@@ -1,29 +1,10 @@
-import {
-  mdiAccountMultiple,
-  mdiCartOutline,
-  mdiChartPie,
-  mdiChartTimelineVariant,
-  mdiGithub,
-  mdiMonitorCellphone,
-  mdiReload,
-} from '@mdi/js'
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Head from 'next/head'
 import React, { useState } from 'react'
 import type { ReactElement } from 'react'
-import Button from '@/components/Button'
 import LayoutAuthenticated from '@/layouts/Authenticated'
 import SectionMain from '@/components/Section/Main'
-import SectionTitleLineWithButton from '@/components/Section/TitleLineWithButton'
-import CardBoxWidget from '@/components/CardBox/Widget'
-import CardBoxTransaction from '@/components/CardBox/Transaction'
-import { Client, Transaction } from '@/interfaces'
-import CardBoxClient from '@/components/CardBox/Client'
-import SectionBannerStarOnGitHub from '@/components/Section/Banner/StarOnGitHub'
-import CardBox from '@/components/CardBox'
-import { sampleChartData } from '@/components/ChartLineSample/config'
-import ChartLineSample from '@/components/ChartLineSample'
-import NotificationBar from '@/components/NotificationBar'
-import TableSampleClients from '@/components/Table/SampleClients'
+// import TableSampleClients from '@/components/Table/SampleClients'
 import { getPageTitle } from '@/config'
 import { checkDarkLightMode } from '@/utils/globalUltils'
 
@@ -32,14 +13,14 @@ const DashboardPage = () => {
   const transactions = []
   const clientsListed = clients.slice(0, 4)
 
-  const [chartData, setChartData] = useState(sampleChartData())
+  const [chartData, setChartData] = useState([])
 
   checkDarkLightMode()
 
   const fillChartData = (e: React.MouseEvent) => {
     e.preventDefault()
 
-    setChartData(sampleChartData())
+    // setChartData(sampleChartData())
   }
 
   return (
@@ -48,7 +29,8 @@ const DashboardPage = () => {
         <title>{getPageTitle('Dashboard')}</title>
       </Head>
       <SectionMain>
-        <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Overview" main>
+        <></>
+        {/* <SectionTitleLineWithButton icon={mdiChartTimelineVariant} title="Overview" main>
           <Button
             href="https://github.com/justboil/admin-one-react-tailwind"
             target="_blank"
@@ -119,11 +101,8 @@ const DashboardPage = () => {
 
         <NotificationBar color="info" icon={mdiMonitorCellphone}>
           <b>Responsive table.</b> Collapses on mobile
-        </NotificationBar>
+        </NotificationBar> */}
 
-        <CardBox hasTable>
-          <TableSampleClients />
-        </CardBox>
       </SectionMain>
     </>
   )
